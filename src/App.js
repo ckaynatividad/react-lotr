@@ -1,6 +1,6 @@
 import './App.css';
 import { useEffect, useState } from 'react';
-import { BrowserRouter, NavLink } from 'react-router-dom';
+import { BrowserRouter, NavLink, Switch, Route } from 'react-router-dom';
 
 import CharacterList from './components/Characters/CharacterList';
 import FilmList from './components/Films/FilmList';
@@ -27,7 +27,24 @@ function App() {
 
     // 3. Set the resulting transformation as state using setFilms
     // 4. You'll know it works if the films show up on the page
-    return [];
+    const resp = await fetch('https://the-one-api.dev/v2/movie/', {
+      headers: {
+        Authorization: `Bearer ${process.env.REACT_APP_API_KEY}`,
+      },
+    });
+    // console.log(resp);
+    const data = await resp.json();
+    // console.log(data);
+    const filmsMunged = data.docs.map((item) => [
+      item.name,
+      item.name.trim().toLowerCase().split(' ').join('-'),
+      item.boxOfficeRevenueInMillions,
+      item.academyAwardNominations,
+    ]);
+    // setFilms(filmsMunged);
+    // console.log(filmsMunged);
+    
+    setFilms(filmsMunged);
   };
 
   const getCharacters = async () => {
@@ -43,7 +60,17 @@ function App() {
     //    ]
     // 3. Set the resulting transformation as state using setCharacters
     // 4. You'll know it works if the characters show up on the page
-    return [];
+    const resp = await fetch('https://the-one-api.dev/v2/character/', {
+      headers: {
+        Authorization: `Bearer ${process.env.REACT_APP_API_KEY}`,
+      },
+    });
+    const data = await resp.json();
+    const charMunged = data.docs.map((item) => ({
+      ...item,
+      dates: item.birth && item.death ? `${item.birth} - ${item.death}` : 'Unknown',
+    }));
+    setCharacters(charMunged);
   };
 
   return (
@@ -57,7 +84,16 @@ function App() {
             Characters
           </NavLink>
         </header>
-        {/* ADD YOUR ROUTES HERE */}
+        <Switch>
+          <Route path="/characters" exact>
+            <h1>Characters</h1>
+            <CharacterList characters={characters} />
+          </Route>
+          <Route path="/films" exact>
+            <h1>films</h1>
+            <FilmList films={films} />
+          </Route>
+        </Switch>
       </BrowserRouter>
     </div>
   );
