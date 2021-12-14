@@ -70,7 +70,7 @@ function App() {
     });
     
     const data = await resp.json();
-    console.log(data);
+    // console.log(data);
     const charMunged = data.map((item) => ({
       ...item,
       dates: item.birth && item.death ? `${item.birth} - ${item.death}` : 'Unknown',
